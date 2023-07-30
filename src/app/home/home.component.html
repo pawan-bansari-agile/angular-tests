@@ -1,0 +1,9 @@
+<div class="container mt-5">
+  <h2>Welcome to the Home Page!</h2>
+  <div *ngIf="userDetails">
+    <p><strong>First Name:</strong> {{ userDetails.firstName }}</p>
+    <p><strong>Last Name:</strong> {{ userDetails.lastName }}</p>
+    <p><strong>Email:</strong> {{ userDetails.email }}</p>
+    <p><strong>Phone Number:</strong> {{ userDetails.phoneNumber }}</p>
+  </div>
+</div>
