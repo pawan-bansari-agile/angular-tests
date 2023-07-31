@@ -1,4 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
 import { LoginComponent } from './login.component';
@@ -16,6 +21,7 @@ describe('LoginComponent', () => {
     // Create a spy object for the UserService
     const userServiceSpy = jasmine.createSpyObj<UserService>('UserService', [
       'getUserByEmail',
+      'addUser',
     ]);
 
     const routerSpy = jasmine.createSpyObj<Router>('Router', ['navigate']);
@@ -77,9 +83,20 @@ describe('LoginComponent', () => {
     expect(errorMessage.textContent).toContain('Password is required.');
   });
 
-  it('should call the UserService to check login credentials when form is submitted with valid data', () => {
+  it('should call the UserService to check login credentials when form is submitted with valid data', fakeAsync(() => {
     const email = 'test@example.com';
     const password = 'testpassword';
+
+    // Add a user to the UserService in memory
+    const mockUser = {
+      firstName: 'John',
+      lastName: 'Doe',
+      email,
+      phoneNumber: '1234567890',
+      password,
+    };
+
+    userService.addUser(mockUser);
 
     // Set up the form with valid data
     component.loginForm.setValue({
@@ -87,21 +104,25 @@ describe('LoginComponent', () => {
       password,
     });
 
-    // Mock the UserService's response
-    const mockUser = { email, password };
-    userService.getUserByEmail.and.returnValue(of(mockUser));
-
     // Trigger form submission
     component.onLogin();
+
+    // Use tick to wait for the Observable to complete
+    tick();
 
     // Expect the UserService's getUserByEmail function to have been called with the correct email
     expect(userService.getUserByEmail).toHaveBeenCalledWith(email);
 
     // Expect that the router.navigate function would have been called with the correct arguments
     expect(router.navigate).toHaveBeenCalledWith(['/home'], {
-      queryParams: mockUser,
+      queryParams: {
+        firstName: mockUser.firstName,
+        lastName: mockUser.lastName,
+        email: mockUser.email,
+        phoneNumber: mockUser.phoneNumber,
+      },
     });
-  });
+  }));
 
   it('should handle login failure when incorrect credentials are entered', () => {
     const email = 'test@example.com';

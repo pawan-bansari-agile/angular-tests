@@ -6,8 +6,6 @@ import { Injectable } from '@angular/core';
 export class UserService {
   private users: any[] = [];
 
-  constructor() {}
-
   addUser(user: any): void {
     this.users.push(user);
   }
